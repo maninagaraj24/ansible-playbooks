@@ -1,0 +1,23 @@
+---
+ - hosts: linux
+   tasks:
+   - name: create directories
+     stat:
+      path: "{{item}}"
+      register: folder_status
+     with_items:
+     - ~/Backup
+     - ~/Broker
+     - ~/etc/init.d monit config
+     - ~/Libraries
+     - ~/Logs
+     - ~/Middleware
+     - ~/var/log,run,www
+     - ~/tmp
+ 
+     file:
+      path: "{{itemi.item}}" 
+      state: directory
+     when: item.stat.exists == false
+     with_items:
+     - "{{folder_status.results}}"        

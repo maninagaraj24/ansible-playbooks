@@ -1,0 +1,28 @@
+---
+ - hosts: 192.168.2.197
+   gather_facts: yes
+   vars_prompt:
+   - name: java_source_name
+     prompt: Download and java file Enter the java install source file name
+     private: no
+   tasks:
+   - block:
+     - name: Extract Java File
+       unarchive:
+        src: ./{{java_source_name}}
+        dest: /usr/local/
+        remote_src: no      
+     - name: Symlink for JAVA
+       file:
+        src: /usr/local/jdk1.8.0_231 
+        dest: /usr/local/java 
+        state: link   
+        force: yes 
+     become: yes
+   - name: Set Environment
+     blockinfile:
+      dest: ~/.bashrc
+      block: |     
+       export PATH=$PATH:/usr/local/jdk1.8.0_231/bin        
+       export JAVA_HOME=/usr/local/java
+      insertafter: EOF      

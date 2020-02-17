@@ -1,0 +1,11 @@
+---
+ - hosts: linux
+   gather_facts: yes
+   become: yes
+   action: >
+     "{{ansible_pkg_mgr}}" name= "{{item}}" state=present update_cache=yes
+   with_items:
+     - nginx
+     - apache2
+     - ntp   
+      

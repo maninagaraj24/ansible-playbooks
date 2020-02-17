@@ -1,0 +1,11 @@
+---
+ - name: A play with a vars_prompt section
+   gather_facts: true
+   become: yes
+   hosts: linux
+   vars_prompt:
+     - name: install_nodejs
+       prompt: "Do yo want to install nodejs (yes/no)?"
+       private: no
+   roles:
+   - nodejs    

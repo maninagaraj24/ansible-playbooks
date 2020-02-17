@@ -1,0 +1,64 @@
+---
+ - hosts: linux
+   #   vars_prompt:
+   #    - name: M_NAME
+   #      prompt: Enter the Machine Name
+   #      private: no
+   tasks:
+   - name: GREEN Color
+     blockinfile:
+      path: ~/.bashrc
+      insertafter: EOF
+      block: |
+        M_NAME="{{M_NAME}}"
+        if [ "$color_prompt" = yes ]; then
+
+           PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+        else
+
+          PS1='\[\033[01;32m\]$M_NAME \[\033[00m\]\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+
+        fi
+
+        export HISTTIMEFORMAT=`echo -e "\033[1;34m%F \033[1;34m%T \033[0m"`
+        HISTSIZE=2000
+        HISTFILESIZE=20000
+        alias monit='/usr/local/bin/monit -c /home/$USER/etc/monit/monitrc'
+        export MSF_HOME=/home/$USER
+
+   - name: Cron TAB edit
+     cron:
+      special_time: reboot
+      job: usr/local/bin/monit -c /home/$USER/etc/monit/monitrc
+   
+   - name: Create Directories
+     file:
+       name: "{{item}}"
+       state: directory
+     with_items:  
+     - ~/Backup
+     - ~/Broker
+     - ~/etc/init.d 
+     - ~/etc/monit 
+     - ~/etc/config
+     - ~/Libraries
+     - ~/Logs
+     - ~/Middleware
+     - ~/var/log
+     - ~/var/run
+     - ~/var/ www
+     - ~/tmp
+   tasks:
+   - name: Sudo Level Process
+     become: yes
+     blockinfile:
+      path: /etc/security/limits.conf
+      insertafter: EOF
+      block: |
+       *            soft    nofile          20000
+       *            hard    nofile          20000     
+
+
+
+

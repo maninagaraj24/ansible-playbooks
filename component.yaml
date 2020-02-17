@@ -1,0 +1,70 @@
+
+---
+- hosts: angel
+  gather_facts: true
+ #
+## symlink backoffice,bo-profile,capital-market,chart,EQMFSIP,market,mfLumSum,mutual-fund,mutual-fund-sip,news,portfolio,portfolioAMD,portfolioARQ
+## Angel-CMBridge-(capital-market), angelMarket-(market)
+
+#bo-profile - bo-profile|  Angel-CMBridge - capital-market | angelMarket - market | AngelChart - chart | EQMFSIP - EQMFSIP | angelNewsNdMovers - news | portfolioEQMF - portfolio | portfolioAMD - portfolioAMD| portfolioARQ - portfolioARQ | MutualFund - mutual-fund | MFLumSum - mfLumSum | Backoffice - backoffice | Funds - funds | fno - fno
+
+  vars:
+    component: fno
+    symlink: fno
+    checkout_tag: tags/PROD-LNX-2DECIMAL_PERCISION_CHGS-22JAN2020
+    git_src_path: /home/msf/tmp/angel-broker.API.git
+    date: "{{lookup('pipe','date +%Y-%m-%d')}}"
+
+  tasks:
+    - name: Clone a repo
+      git:
+        repo: https://sampath.s:Welcome%40123@git.assembla.com/angel-broker.API.git
+        dest: /home/msf/tmp/angel-broker.API.git
+        clone: yes
+        update: yes
+        version: master
+        force: yes
+
+    - name: git checkout main tag
+      git:
+        repo: https://sampath.s:Welcome%40123@git.assembla.com/angel-broker.API.git
+        dest: /home/msf/tmp/angel-broker.API.git
+        update: yes
+        version: "{{ checkout_tag }}"
+        force: yes
+
+    - name: remote copy recursively
+      synchronize:
+        src: "{{ git_src_path }}/{{ component }}/"
+        dest: /home/msf/Broker/{{ component }}-prod-{{ date }}
+        rsync_opts:
+          - "-aPp"
+      delegate_to: "{{ inventory_hostname }}"
+
+    - name: make clean on component
+      shell: cd /home/msf/Broker/{{ component }}-prod-{{ date }} 'make clean'
+
+    - name: Compile component
+      make:
+        chdir: /home/msf/Broker/{{ component }}-prod-{{ date }}
+        params:
+          NUM_THREADS: 4
+      tags: make_component
+
+    - name: stop monit component
+      command: "/usr/local/bin/monit -c /home/msf/etc/monit/monitrc stop {{ symlink }}"
+      become_user: msf
+      tags: monit_stop
+
+    - name: unlink the component
+      file: path=/home/msf/Broker/{{ symlink }} state=absent
+
+    - name: link the component
+      file: src=/home/msf/Broker/{{ component }}-prod-{{ date }} dest=/home/msf/Broker/{{ symlink }} owner=msf group=msf state=link
+      tags: link_component
+
+    - name: start monit component
+      command: "/usr/local/bin/monit -c /home/msf/etc/monit/monitrc start {{ symlink }}"
+      become_user: msf
+      tags: monit_start
+

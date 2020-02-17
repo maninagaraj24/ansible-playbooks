@@ -1,0 +1,25 @@
+---
+ - name: A play with a vars_prompt section
+   gather_facts: true
+   become: yes
+   hosts: linux
+   vars_prompt:
+     - name: install_mysql
+       prompt: "Do yo want to install mysql (yes/no)?"
+       private: no
+     - name: install_nginx
+       prompt: "Do you want to install nginx (yes/no)?"
+       private: no  
+     - name: install_ntp
+       prompt: "Do you want to install ntp (yes/no)?"
+       private: no
+   tasks:
+    - name: Include role when you answered yea
+      include_tasks: mysql.yml
+      when: install_mysql == 'yes'
+    - name: Install nginx
+      include_tasks: nginx.yaml
+      when: install_nginx == 'yes'  
+    - name: Install NTP
+      include_tasks: ntp.yaml
+      when: install_ntp == 'yes' 

@@ -1,0 +1,13 @@
+---
+ - name: Install Debian php-fpm
+   apt:
+    name: php7.4-fpm
+    state: present
+   when: ansible_os_family== 'Debian'
+ - name: Install Redhat php-fpm
+   yum:
+    name: php7.4-fpm
+    state: present
+   when: ansible_os_family== 'Redhat' 
+     
+

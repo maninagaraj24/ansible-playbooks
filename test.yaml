@@ -1,0 +1,11 @@
+---
+ - hosts: linux
+   gather_facts: true
+   tasks:
+   - expect:        
+     apt:      
+        name: apache2
+        state: present
+     responses:
+        Question: 
+           - yes      

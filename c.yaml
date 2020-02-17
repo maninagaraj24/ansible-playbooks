@@ -1,0 +1,25 @@
+---
+ - hosts: 192.168.2.216
+   become: yes
+   tasks:
+   - name: Install Debian
+     apt:
+      name: "{{item}}"
+      state: present
+      update_cache: yes
+     when: ansible_os_family == 'Debian' 
+     with_items:
+        - gcc
+        - build-essential
+        - zlib1g-dev
+        - libssl-dev
+   - name: Install RedHat  
+     yum: 
+       name: "{{item}}"
+       state: present
+       update_cache: yes
+     when: ansible_os_family == 'RedHat' 
+     with_items:
+       - gcc       
+       - zlib-devel
+       - openssl-devel

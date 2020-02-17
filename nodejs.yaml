@@ -1,0 +1,36 @@
+---
+ - hosts: linux 
+   gather_facts: yes 
+   become: yes
+   tasks:
+    - block:        
+      - name: Curl Install
+        apt: 
+          name: curl
+          state: present
+          
+      - name: Download and Install Nodejs PPA
+        shell: "curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -"    
+      when: ansible_os_family == 'Debian'  
+    - block:  
+      - name: Curl Install for Redhat
+        yum:
+          name: curl
+          state: present
+      - name: Download and Install Nodejs PPA for Redhat
+        shell: "curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -"
+      when: ansible_os_family == 'RedHat'
+   
+    - block:
+      - name: Nodejs for Debian
+        apt:
+          name: nodejs
+          state: present
+        when: ansible_os_family== 'Debian'
+      - name: Nodejs Install for Redhat
+        yum:
+          name: nodejs
+          state: present
+        when: ansible_os_family== 'RedHat'
+      become: yes
+

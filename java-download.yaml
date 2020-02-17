@@ -1,0 +1,13 @@
+---
+- hosts: 192.168.2.195
+  #  vars:
+  #    download_url: http://download.oracle.com/otn-pub/java/jdk/8u5-b13/jdk-8u5-linux-x64.tar.gz
+  #    download_folder: ~/ansible/
+  #    java_name: "{{download_folder}}/jdk1.8.0_05"
+  #    java_archive: "{{download_folder}}/jdk-8u5-linux-x64.tar.gz"
+
+
+  tasks:
+  - name: Download Java
+    command: "wget -q -O {{~/ansible/jdk-8u5-linux-x64.tar.gz}} --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' {{http://download.oracle.com/otn-pub/java/jdk/8u5-b13/jdk-8u5-linux-x64.tar.gz}} creates={{~/ansible/jdk-8u5-linux-x64.tar.gz}}"
+

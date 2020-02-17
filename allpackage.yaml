@@ -1,0 +1,44 @@
+---
+ - name: A play with a vars_prompt section
+   gather_facts: true
+   become: yes
+   hosts: linux
+   vars_prompt:
+     - name: install_apache
+       prompt: "Do yo want to install apache (yes/no)?"
+       private: no
+     - name: install_nginx
+       prompt: "Do you want to install nginx (yes/no)?"      
+     - name: install_mysql
+       prompt: "Do yo want to install mysql (yes/no)?"
+       private: no
+     - name: install_nginx
+       prompt: "Do you want to install nginx (yes/no)?"
+       private: no
+     - name: install_ntp
+       prompt: "Do you want to install ntp (yes/no)?"
+       private: no
+     - name: install_nodejs
+       prompt: "Do you want to install nodejs (yes/no)?"
+       private: no
+     - name: install_java
+       prompt: "Do you want to install java-version-8 (yes/no)?"
+       private: no
+     - name: install_mongodb
+       prompt: "Do you want to install java-version-8 (yes/no)?"
+       private: no
+     - name: install_monit
+       prompt: "Do you want to install Monit (yes/no)?"
+       private: no 
+     - name: monit_version
+       prompt: Monit version to install and the lastes version is 5.26.0?
+       private: no  
+   roles:
+   - apache        
+   - mysql-server
+   - nginx
+   - ntp
+   - nodejs  
+   - java
+   - mongodb
+   - monit

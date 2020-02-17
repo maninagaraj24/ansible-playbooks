@@ -1,0 +1,16 @@
+---
+ - hosts: 192.168.2.191
+   become: yes
+   vars_prompt:
+    - name: pkg
+      prompt: Enther Which pkg needs to install \n 
+      private: no
+    - name: req_state
+      prompt: Enter Present or absent
+      private: no
+   tasks:  
+   - name : Execution
+     apt:
+      name: "{{pkg}}"
+      state: "{{req_state}}" 
+      

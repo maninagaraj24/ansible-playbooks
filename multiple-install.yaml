@@ -1,0 +1,21 @@
+---
+ - hosts: 192.168.2.191
+   gather_facts: yes
+   become: yes
+   vars:
+    name: "{{item}}"
+   with_items:
+    - name: nginx
+    - name: apache2
+    - name: ntp      
+   tasks:
+   - name: Debian Install
+     apt:
+      name: "{{item.name}}" 
+      state: present
+     when: ansible_os_family=="Debian"
+   - name: Redhat Install
+     yum: 
+      name: "{{item.name}}"
+      state: present
+     when: ansible_os_family=="Redhat"    

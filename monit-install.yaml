@@ -1,0 +1,35 @@
+---
+ - hosts: localhost
+   vars_prompt:
+     - name: monit_version
+       prompt: Monit version to install and the lastes version is 5.26.0?
+       private: no
+   tasks:
+   - name: Download Monit 
+     shell: "wget -P ./roles/monit/files/ https://mmonit.com/monit/dist/monit-{{ monit_version }}.tar.gz"
+ - hosts: linux
+   vars_prompt:
+     - name: monit_version
+       prompt: Monit version to install and the lastes version is 5.26.0?
+       private: no
+   tasks:
+   - name: Unarchive Monit from file
+     unarchive:
+       src: ./roles/monit/files/monit-{{ monit_version }}.tar.gz
+       dest: /tmp/
+       remote_src: no
+   - name: Configure the monit 
+     shell: 
+      chdir: /tmp/monit-{{ monit_version }}
+      cmd: "./configure --without-pam"
+   - name: Make
+     make:
+      chdir: /tmp/monit-{{ monit_version }}     
+      target: all
+   - name: Make Install
+     make:
+       chdir: /tmp/monit-5.26.0    
+       target: install
+     become: yes 
+     become_user: root
+     become_method: ansible_user 
