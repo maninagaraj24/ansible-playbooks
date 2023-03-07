@@ -1,0 +1,105 @@
+---
+- hosts: localhost
+  vars_prompt:
+     - name: tv
+       prompt: Which Version need to download 9 or 10?
+       private: no
+     - name: tev
+       prompt: Please enter exact version ex.9.0.73?
+       private: no
+  tasks:
+  - name: Download latest Verstion of Tomcat
+    shell: "wget https://dlcdn.apache.org/tomcat/tomcat-{{ tv }}/v{{ tev }}/bin/apache-tomcat-{{ tev }}.tar.gz"
+  - name: Extract Tomcat
+    unarchive:
+        src: ./apache-tomcat-{{ tev }}.tar.gz
+        dest: .
+        remote_src: no
+  - name: Copy Setenv.sh
+    copy:
+       src: ./setenv.sh
+       dest: ./apache-tomcat-{{ tev }}/bin/
+  - name: Delete Unwanted Directories
+    file:
+       state: absent
+       path: "{{ item }}"
+    with_items:
+       - ./apache-tomcat-{{ tev }}/webapps/docs
+       - ./apache-tomcat-{{ tev }}/webapps/examples
+       - ./apache-tomcat-{{ tev }}/webapps/host-manager
+       - ./apache-tomcat-{{ tev }}/webapps/ROOT
+  - name: Jar Extract
+    args:
+       chdir: "/home/msf/tmp/shell-script/tomcat/apache-tomcat-{{ tev }}/lib/"
+    shell: jar xf catalina.jar org/apache/catalina/util/ServerInfo.properties
+  - name: ServerInfo
+    file:
+          state: absent
+          path: /home/msf/tmp/shell-script/tomcat/apache-tomcat-{{ tev }}/lib/org/apache/catalina/util/ServerInfo.properties
+  - name: Copy ServerInfo
+    copy:
+          src: ./ServerInfo.properties
+          dest: /home/msf/tmp/shell-script/tomcat/apache-tomcat-{{ tev }}/lib/org/apache/catalina/util/
+  - name: Jar Build
+    args:
+         chdir: "/home/msf/tmp/shell-script/tomcat/apache-tomcat-{{ tev }}/lib/"
+    shell: jar uf catalina.jar org/apache/catalina/util/ServerInfo.properties
+  - name: ADD Grant
+    blockinfile:
+          path: ./apache-tomcat-{{ tev }}/conf/catalina.policy
+          insertbefore: // You can assign additional permissions to particular web applications by
+          block: |
+             grant {
+                permission java.security.AllPermission;
+             };
+  - name: Add Security
+    blockinfile:
+          path: ./apache-tomcat-{{ tev }}/conf/catalina.policy
+          insertafter: EOF
+          block: |
+             exec "$PRGDIR"/"$EXECUTABLE" start -security "$@"
+  - name: Add Manager Script
+    blockinfile:
+           path: ./apache-tomcat-{{ tev }}/conf/tomcat-users.xml
+           insertbefore: </tomcat-users>
+           block: |
+              <role rolename="manager-script"/>
+
+              <user username="msfadmin" password="Y8*z2b" roles="manager-script"/>
+  - name: Replace PORT
+    replace:
+             path: ./apache-tomcat-{{ tev }}/conf/server.xml
+             regexp: '8005'
+             replace: '9005'
+  - name: Re
+    xml:
+      path: ./apache-tomcat-{{ tev }}/conf/server.xml
+      xpath: /Server/Service/Connector
+      state: absent
+  - name: ADD
+    xml:
+      path: ./apache-tomcat-{{ tev }}/conf/server.xml
+      xpath: /Server/Service
+      add_children:
+        - Connector:
+            port: "9010"
+            protocol: "HTTP/1.1"
+            xpoweredBy: "false"
+            connectionTimeout: "20000"
+            maxThreads: "1000"
+            redirectPort: "8443"
+            server: "RioServer"
+            enableLookups: "false"
+            maxHttpHeaderSize: "8192"
+            allowTrace: "false"
+  - name: ADD VALUE
+    xml:
+       path: ./apache-tomcat-{{ tev }}/conf/server.xml
+       xpath: /Server/Service/Engine/Host
+       add_children:
+         - value:
+             className: "org.apache.catalina.valves.ErrorReportValve"
+             errorCode.400: "conf/50x.html"
+             errorCode.0: "conf/50x.html"
+             showReport: "false"
+             showServerInfo: "false"
