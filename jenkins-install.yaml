@@ -1,0 +1,39 @@
+---
+- hosts: all
+  become: true
+  become_user: root
+  tasks: 
+  - name: Update system 
+    ansible.builtin.yum:
+        name: '*'
+        state: latest
+    when: ansible_os_family == 'RedHat'
+
+  - name: Update Debian packages
+    ansible.builtin.apt:
+        name: '*'
+        state: latest
+    when: ansible_os_family == 'Debian'
+
+  - name: Ensure Jenkins repository is added
+    yum_repository:
+        name: jenkins-ci
+        description: jenkins-ci package repository
+        baseurl: http://pkg.jenkins.io/redhat
+        gpgkey: https://pkg.jenkins.io/redhat/jenkins.io.key
+        gpgcheck: yes
+  - name: Ensure gpp key is imported
+    rpm_key:
+        state: present
+        key: https://pkg.jenkins.io/redhat/jenkins.io.key
+  - name: Ensure Jenkins and java-devel package installed
+    yum:
+        name: '{{ packages }}'
+        state: present
+        update_cache: true
+    vars:
+      packages:
+          - jenkins
+          - java-devel
+
+  
